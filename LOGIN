@@ -1,0 +1,94 @@
+Main Form
+
+
+Private Sub btnAddNew_Click()
+        DoCmd.Close acForm, Me.Name
+        DoCmd.OpenForm "Register"
+End Sub
+
+Private Sub btnCancel_Click()
+        DoCmd.Close acForm, Me.Name
+        DoCmd.OpenForm "Login"
+End Sub
+
+
+
+Add User Form
+
+Private Sub btnAdd_Click()
+    Dim firstName As String
+    Dim lastName As String
+    Dim username As String
+    Dim password As String
+    Dim userID As Long
+    Dim createTime As Date
+    
+    
+    firstName = Me.txtFirstname.Value
+    lastName = Me.txtLastName.Value
+    username = Me.txtRegUsername.Value
+    password = Me.txtRegPassword.Value
+    createTime = Now()
+    
+    If txtFirstname = "" Or txtLastName = "" Or txtRegUsername = "" Or txtRegPassword = "" Then
+    MsgBox "Please fill in all fields.", vbExclamation
+    Else
+    
+    CurrentDb.Execute "INSERT INTO Users (FirstName, LastName, CreateTime) VALUES ('" & firstName & "', '" & lastName & "', '" & createTime & "')"
+
+    userID = DMax("UserID", "Users")
+    
+    CurrentDb.Execute "INSERT INTO LoginCredentials (UserID, Username, Password) VALUES (" & userID & ", '" & username & "', '" & password & "')"
+    
+    MsgBox "Registration successful!"
+    
+    
+    Me.txtFirstname.Value = ""
+    Me.txtLastName.Value = ""
+    Me.txtRegUsername.Value = ""
+    Me.txtRegPassword.Value = ""
+    
+    End If
+    
+End Sub
+
+Private Sub btnCancel_Click()
+        DoCmd.Close acForm, Me.Name
+        DoCmd.OpenForm "Main"
+End Sub
+
+
+
+Log In Form
+
+
+Private Sub btnCancel_Click()
+        DoCmd.Close acForm, Me.Name
+End Sub
+
+Private Sub btnLogin_Click()
+Dim username As String
+    Dim password As String
+    Dim rs As DAO.Recordset
+    
+    username = Me.txtUsername.Value
+    password = Me.txtPassword.Value
+    
+    Set rs = CurrentDb.OpenRecordset("SELECT * FROM LoginCredentials WHERE Username='" & username & "' AND Password='" & password & "'")
+
+    If rs.EOF Then
+        MsgBox "Invalid username or password."
+        Me.txtUsername.Value = ""
+        Me.txtPassword.Value = ""
+    Else
+        MsgBox "Login successful!"
+        Me.txtUsername.Value = ""
+        Me.txtPassword.Value = ""
+        DoCmd.Close acForm, Me.Name
+        DoCmd.OpenForm "Main"
+
+    End If
+    
+    rs.Close
+    
+End Sub
