@@ -1,0 +1,65 @@
+
+' NOTE: * is for Update only
+
+
+Private Sub btnUpdate_Click()
+    ' Update data in the database
+    ' For simplicity, assuming you're using DAO, adjust if you're using ADO or other method
+    Dim db As Database
+    Dim rs As Recordset
+    
+    Set db = CurrentDb
+    Set rs = db.OpenRecordset("Users", dbOpenDynaset)
+    
+    ' Find the record to update
+    rs.FindFirst "UserID =" & Me.txtSearchUserID
+    If Not rs.NoMatch Then
+        rs.Edit
+        rs!firstName = Me.txtFirstname
+        rs!lastName = Me.txtLastName
+        rs!Username = Me.txtRegUsername
+        rs!Password = Me.txtRegPassword
+        rs!UpdateTime = Now
+        rs.Update
+    End If
+    
+    ' Close recordset and database
+    rs.Close
+    Set rs = Nothing
+    Set db = Nothing
+    
+    ' Inform user about successful update
+    MsgBox "Data updated successfully.", vbInformation, "Success"
+    
+    ' Clear all fields and disable update button
+    ClearFields
+    Me.btnUpdate.Enabled = False
+End Sub
+
+Private Sub ClearFields()
+    ' Clear all fields
+    Me.txtSearchUserID.Value = ""
+    Me.txtFirstname.Value = ""
+    Me.txtLastName.Value = ""
+    Me.txtRegUsername.Value = ""
+    Me.txtRegPassword.Value = ""
+    
+End Sub
+
+
+Private Sub txtSearchUserID_AfterUpdate()
+
+If IsNull(DLookup("UserID", "Users", "UserID =" & Me.txtSearchUserID)) Then
+    MsgBox "User ID not found.", vbCritical, "Sorry"
+    
+    ClearFields
+Else
+
+Me.txtFirstname = DLookup("FirstName", "Users", "UserID =" & Me.txtSearchUserID)
+Me.txtLastName = DLookup("LastName", "Users", "UserID =" & Me.txtSearchUserID)
+Me.txtRegUsername = DLookup("Username", "LoginCredentials", "UserID =" & Me.txtSearchUserID)
+Me.txtRegPassword = DLookup("Password", "LoginCredentials", "UserID =" & Me.txtSearchUserID)
+
+Me.btnUpdate.Enabled = True
+End If
+End Sub
